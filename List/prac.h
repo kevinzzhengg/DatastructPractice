@@ -68,7 +68,7 @@ bool Init_Sqlist(Sqlist &L,int length, int begin = 1,int step = 1,bool SET_ZERO 
     return true; 
 }
 //生成顺序表（随机排列）
-bool Init_Sqlist_Random(Sqlist &L, int length)
+bool Init_Sqlist_Random(Sqlist &L, int length,int start = 1, int end = 10)
 {
     srand((unsigned int)time(NULL));
     if (length > MAXLENGTH)
@@ -80,7 +80,7 @@ bool Init_Sqlist_Random(Sqlist &L, int length)
         L.data[i].str[1] = 'a';
         L.data[i].str[2] = 'r';
         L.data[i].str[3] = '\0';
-        L.data[i].value = rand() % 4 + 1;  //范围根据自己需要修改
+        L.data[i].value = rand() % (end - start + 1)  + start;  //范围根据自己需要修改
         L.data[i].weight = 1;
     }
     L.data[0].value = -999;
@@ -133,7 +133,7 @@ void PrintLNode(LinkList p)
         printf("the node is not exsist.");
         return;
     }    
-    printf(" {%s:%2d} ",(*p).data.str,(*p).data.value);
+    printf("-{%s:%2d}-",(*p).data.str,(*p).data.value);
 }
 //打印单链表
 bool PrintLinkList(LinkList L)
@@ -145,6 +145,7 @@ bool PrintLinkList(LinkList L)
         PrintLNode(p);
         p = p->next;
     } while (p != NULL);   
+    printf("-NULL\n");
     return true;
 }
 //初始化链表头结点
@@ -161,11 +162,11 @@ LinkList InitLinklist()
     return lhead;
 };
 //采用尾插法建立单链表
-LinkList List_TailInsert(LinkList L, int n)
+LinkList List_TailInsert(LinkList L, int length)
 {
     LinkList p,lrear;
     lrear = L;
-    for (int i = 1; i <= n; i++)
+    for (int i = 1; i <= length; i++)
     {
         p = (LinkList)malloc(sizeof(LNode));
         lrear->next = p;
@@ -173,12 +174,49 @@ LinkList List_TailInsert(LinkList L, int n)
         p->data.str[0] = 'v';
         p->data.str[1] = 'a';
         p->data.str[2] = 'r';
-        p->data.str[3] = ' ';
+        p->data.str[3] = '\0';
         p->data.value = i;
+        p->data.weight = 1;
         p->next = NULL;
     }
     return L;
 };
+//生成随机数链表
+LinkList List_TailInsert_Random(LinkList L, int length, int start = 1,int end = 10)
+{
+    LinkList p,lrear;
+    srand((unsigned int)time(NULL));
+    lrear = L;
+    for (int i = 1; i <= length; i++)
+    {
+        p = (LinkList)malloc(sizeof(LNode));
+        lrear->next = p;
+        lrear = p;
+        p->data.str[0] = 'v';
+        p->data.str[1] = 'a';
+        p->data.str[2] = 'r';
+        p->data.str[3] = '\0';
+        p->data.value = rand() % (end - start + 1) + start;
+        p->data.weight = 1;
+        p->next = NULL;
+    }
+    return L;
+}
+//生成不带头结点的链表
+LinkList NoHeadLinklist(LinkList L)
+{
+    LinkList p = L;
+    if (p->next == NULL)
+    {
+        printf("\nthis linklist is empty!\n");
+        return L;
+    }
+    else
+    {
+        p = p->next;
+        return p;
+    }  
+}
 //返回尾结点指针
 LinkList GetRearNode(LinkList L)
 {
@@ -202,6 +240,22 @@ LinkList GetElem(LinkList L, int i)
     }
     return p;
 };
+//递归按值删除链表中的结点
+void LinkList_Delete_value(LinkList &L,int value)
+{   
+    LinkList p;
+    if (L == NULL)
+        return;
+    if (L->data.value == value)
+    {
+        p = L;
+        L = L->next;
+        free(p);
+        LinkList_Delete_value(L,value);
+    }
+    else
+        LinkList_Delete_value(L->next,value);
+}
 
 //静态链表区
 //生成静态链表的指针表（附加在原来的顺序表中，使用顺序表生成）
@@ -245,6 +299,7 @@ int max_in_tri(int a, int b,int c)
 }
 //--------------------------------------
 //练习函数区
+//顺序表习题
 void P18_01(){
     //初始化随机顺序表
     Sqlist L;
@@ -608,10 +663,71 @@ void P18_13(){
     
 }
 void P18_14(){
-    //初始化 
-    printf("\nthe max is : %d\n",max_in_tri(7,5,2));
-}
+    //初始化测试样例
+    int length_1 = 3;
+    int length_2 = 4;
+    int length_3 = 5;
+    Sqlist L1,L2,L3;
+    Init_Sqlist(L1,length_1,1,7);
+    Init_Sqlist(L2,length_2,3,4);
+    Init_Sqlist(L3,length_3,4,2);
+    PrintSqlist(L1);
+    PrintSqlist(L2);
+    PrintSqlist(L3);
 
+    //算法使用三指针来解决
+    int p = 1,q = 1,r = 1;
+    int min = 100;
+    int min_index[3];
+    while (p < length_1 || q < length_2 || r < length_3)
+    {
+        int distance = max_in_tri(abs(L1.data[p].value-L2.data[q].value),abs(L1.data[p].value-L3.data[r].value),abs(L2.data[q].value-L3.data[r].value));
+        if (distance < min)
+        {
+            min = distance;
+            min_index[0] = L1.data[p].value;
+            min_index[1] = L2.data[q].value;
+            min_index[2] = L3.data[r].value;
+        }
+            
+        if (L1.data[p].value <= L2.data[q].value && L1.data[p].value <= L3.data[r].value)
+            p++;
+        else if (L2.data[q].value <= L1.data[p].value && L2.data[q].value <= L3.data[r].value)
+            q++;
+        else r++;
+    }
+    printf("\n\nthe min distance is %d,in (%d,%d,%d)",2*min,min_index[0],min_index[1],min_index[2]);
+}
+//链表习题
+void P40_01(){
+    //初始化
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert_Random(L,10,1,3);
+    L = NoHeadLinklist(L);
+    PrintLinkList(L);
+    int del_target = 3;
+    LinkList_Delete_value(L,del_target);
+    PrintLinkList(L);
+}
+void P40_02(){
+
+}
+void P40_03(){
+    
+}
+void P40_04(){
+    
+}
+void P40_05(){
+    
+}
+void P40_06(){
+    
+}
+void P40_07(){
+    
+}
 
 void P42_25(){
     //初始化头结点
