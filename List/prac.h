@@ -240,7 +240,7 @@ LinkList GetElem(LinkList L, int i)
     }
     return p;
 };
-//递归按值删除链表中的结点
+//递归按值删除链表中的结点(无头链表)
 void LinkList_Delete_value(LinkList &L,int value)
 {   
     LinkList p;
@@ -255,6 +255,40 @@ void LinkList_Delete_value(LinkList &L,int value)
     }
     else
         LinkList_Delete_value(L->next,value);
+}
+//返回链表中最小值的指针(带头结点)
+LinkList LinkList_FindMin(LinkList L)
+{
+    LinkList p,q;
+    int min = 999;
+    p = L;
+    while (p->next != NULL)
+    {
+        p = p->next;
+        if (p->data.value <= min)
+        {
+            min = p->data.value;
+            q = p;
+        }
+    }
+    return q;
+}
+//返回链表中最大值的指针（带头结点）
+LinkList LinkList_FindMax(LinkList L)
+{
+    LinkList p,q;
+    int max = -1;
+    p = L;
+    while (p->next != NULL)
+    {
+        p = p->next;
+        if (p->data.value >= max)
+        {
+            max = p->data.value;
+            q = p;
+        }
+    }
+    return q;
 }
 
 //静态链表区
@@ -711,19 +745,136 @@ void P40_01(){
     PrintLinkList(L);
 }
 void P40_02(){
+    //初始化
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert_Random(L,10,1,3);
+    PrintLinkList(L);
+    int x = 3;
 
+    //算法部分  void delete_headlinklist(linklist &l,int x)
+    LinkList p,q;
+    p = L;
+    while (p->next != NULL)
+    {
+        q = p->next;
+        if (q->data.value == x)
+        {
+            p->next = q->next;
+            free(q);
+        }
+        else
+            p = p->next;
+    }
+    PrintLinkList(L);
 }
 void P40_03(){
-    
+    //初始化部分
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert(L,5);
+    PrintLinkList(L);
+
+    //算法部分 
+    LinkList stack;
+    stack = InitLinklist();
+    LinkList p,q,r;
+    p = L;
+    q = stack; 
+    while (p->next != NULL)
+    {
+        r = (LinkList)malloc(sizeof(LNode));
+        r->data.str[0] = 'v';
+        r->data.str[1] = 'a';
+        r->data.str[2] = 'r';
+        r->data.str[3] = '\0';
+        r->data.value = p->next->data.value;
+        r->data.weight = p->next->data.weight;
+        r->next = q->next;
+        q->next = r;
+        p = p->next;
+    }
+    PrintLinkList(stack);
 }
 void P40_04(){
-    
+    //初始化
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert_Random(L,5,20,50);
+    PrintLinkList(L);
+
+    //算法部分
+    int min = 1000,cnt = 0,index = 0;
+    LinkList p,q;
+    p = L;
+    while (p->next != NULL)
+    {
+        p = p->next;
+        cnt++;
+        if (p->data.value < min)
+        {
+            min = p->data.value;
+            index = cnt;
+        }    
+    }
+    if (index == 0)
+    {
+        printf("\nthe linklist is empty!\n");
+        return;
+    }
+    p = L;
+    q = L->next;
+    for (int i = 1; i < index; i++)
+    {
+        p = p->next;
+        q = q->next;
+    }
+    p->next = q->next;
+    free(q);
+    PrintLinkList(L);
 }
 void P40_05(){
-    
+    //初始化
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert(L,5);
+    PrintLinkList(L);
+    //算法部分
+    LinkList p,q,r;
+    p = L;
+    if (p->next == NULL || p->next->next == NULL)
+    {
+        printf("\nthe linklist has no need to revrese.\n");
+        return;
+    }
+    q = p->next;
+    r = q;
+    while (r->next != NULL)
+    {
+        q = r->next;
+        r->next = q->next;
+        q->next = p->next;
+        p->next = q;
+    }
+    PrintLinkList(L);
 }
 void P40_06(){
-    
+    //初始化
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert_Random(L,5,10,80);
+    PrintLinkList(L);
+
+    //算法部分 选择插入排序
+    LinkList p,q;
+    p = L;
+    while (p->next != NULL)
+    {   
+        q = LinkList_FindMax(p);
+        q->next = L->next;
+        L->next = q;
+    }
+    PrintLinkList(L);
 }
 void P40_07(){
     
