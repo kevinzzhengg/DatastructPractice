@@ -133,11 +133,17 @@ void PrintLNode(LinkList p)
         printf("the node is not exsist.");
         return;
     }    
-    printf("-{%s:%2d}-",(*p).data.str,(*p).data.value);
+    printf("-{%s:%2d}-",p->data.str,p->data.value);
 }
 //打印单链表
 bool PrintLinkList(LinkList L)
 {
+    if (L == NULL)
+    {
+        printf("\nthe head node is not existed！\n");
+        return false;
+    }
+    
     printf("\nthe linklist is :\n");
     LinkList p = L;
     if(p == NULL) return false;
@@ -256,7 +262,7 @@ void LinkList_Delete_value(LinkList &L,int value)
     else
         LinkList_Delete_value(L->next,value);
 }
-//返回链表中最小值的指针(带头结点)
+//返回链表中最小值结点的前驱指针(带头结点)
 LinkList LinkList_FindMin(LinkList L)
 {
     LinkList p,q;
@@ -264,16 +270,16 @@ LinkList LinkList_FindMin(LinkList L)
     p = L;
     while (p->next != NULL)
     {
-        p = p->next;
-        if (p->data.value <= min)
+        if (p->next->data.value <= min)
         {
-            min = p->data.value;
+            min = p->next->data.value;
             q = p;
         }
+        p = p->next;
     }
     return q;
 }
-//返回链表中最大值的指针（带头结点）
+//返回链表中最大值的结点的前驱指针（带头结点）
 LinkList LinkList_FindMax(LinkList L)
 {
     LinkList p,q;
@@ -281,14 +287,37 @@ LinkList LinkList_FindMax(LinkList L)
     p = L;
     while (p->next != NULL)
     {
-        p = p->next;
-        if (p->data.value >= max)
+        if (p->next->data.value >= max)
         {
-            max = p->data.value;
+            max = p->next->data.value;
             q = p;
         }
+        p = p->next;
     }
     return q;
+}
+//选择排序单链表（带头结点）
+void Linklist_SelectSort(LinkList &L)
+{
+    //算法部分 选择插入排序
+    LinkList p,q,r;
+    p = L;
+    //这里先排一次是为了让p指向分界的结点处
+    q = LinkList_FindMax(p);
+    r = q->next;
+    q ->next = r->next;
+    r->next = L->next;
+    L->next = r;
+    p = r;
+    while (p->next != NULL)
+    {   
+        q = LinkList_FindMax(p); 
+        r = q->next;
+        q ->next = r->next;
+
+        r->next = L->next;
+        L->next = r;
+    }
 }
 
 //静态链表区
@@ -866,17 +895,162 @@ void P40_06(){
     PrintLinkList(L);
 
     //算法部分 选择插入排序
-    LinkList p,q;
+    LinkList p,q,r;
     p = L;
+    //这里先排一次是为了让p指向分界的结点处
+    q = LinkList_FindMax(p);
+    r = q->next;
+    q ->next = r->next;
+    r->next = L->next;
+    L->next = r;
+    p = r;
     while (p->next != NULL)
     {   
-        q = LinkList_FindMax(p);
-        q->next = L->next;
-        L->next = q;
+        q = LinkList_FindMax(p); 
+        r = q->next;
+        q ->next = r->next;
+
+        r->next = L->next;
+        L->next = r;
     }
     PrintLinkList(L);
 }
 void P40_07(){
+    //初始化
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert_Random(L,10,1,4);
+    PrintLinkList(L);
+    int start = 2;
+    int end = 3;
+
+    //算法部分  void delete_headlinklist(linklist &l,int start，int end)
+    LinkList p,q;
+    p = L;
+    while (p->next != NULL)
+    {
+        q = p->next;
+        if (q->data.value <= end && q->data.value>=start)
+        {
+            p->next = q->next;
+            free(q);
+        }
+        else
+            p = p->next;
+    }
+    PrintLinkList(L);
+}
+void P40_08(){
+    //初始化
+    LinkList L1,L2;
+    L1 = InitLinklist();
+    L2 = InitLinklist();
+    L1 = List_TailInsert_Random(L1,10,10,30);
+    L2 = List_TailInsert_Random(L2,10,10,25);
+    
+    //算法部分，先进行排序，然后再使用双指针
+    Linklist_SelectSort(L1);
+    Linklist_SelectSort(L2);
+    PrintLinkList(L1);
+    PrintLinkList(L2);
+    LinkList p,q;
+    if (L1->next == NULL || L2->next == NULL)
+    {
+        printf("\nthe empty list is existed in input ,so no same node.\n");
+        return;
+    }
+    
+    p = L1->next;
+    q = L2->next;
+    printf("\n");
+    while (p != NULL && q != NULL)
+    {
+        if (p->data.value == q->data.value)
+        {
+            PrintLNode(p);
+            if (p->next->data.value == p->data.value && p->next != NULL)
+            {
+                p = p->next;
+                continue;
+            }
+            if (q->next->data.value == q->data.value && q->next != NULL)
+            {
+                q = q->next;
+                continue;
+            }
+            p = p->next;
+            q = q->next;      
+        }
+        else if (p->data.value < q->data.value)
+            p = p->next;
+        else q = q->next;
+    }
+}
+void P40_09(){
+    //初始化
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert_Random(L,5,10,80);
+    PrintLinkList(L);
+    //算法部分，每找到一个最小值就输出并且删除
+    LinkList p,q;
+    while (L->next != NULL)
+    {
+        p = LinkList_FindMin(L);
+        q = p->next;
+        PrintLNode(q);
+        p->next = q->next;
+        free(q);
+    }
+    PrintLinkList(L);
+    free(L);  //最后一个free掉之后一定要重新指定NULL，不然会导致野指针
+    L = NULL;
+    PrintLinkList(L);
+}
+void P40_10(){
+    //初始化
+    LinkList L,res1,res2;
+    L = InitLinklist();
+    res1 = InitLinklist();
+    res2 = InitLinklist();
+    L = List_TailInsert(L,10);
+
+    //算法部分
+    LinkList p,q,r;
+    int cnt = 1;
+    p = L->next;
+    while (p != NULL)
+    {
+        if (cnt % 2 == 1)
+        {
+            
+        }
+        
+    }
+    
+}
+void P40_11(){
+    
+}
+void P40_12(){
+    
+}
+void P40_13(){
+    
+}
+void P40_14(){
+    
+}
+void P40_15(){
+    
+}
+void P40_16(){
+    
+}
+void P40_17(){
+    
+}
+void P40_18(){
     
 }
 
