@@ -167,8 +167,8 @@ LinkList InitLinklist()
     lhead->next = NULL;
     return lhead;
 };
-//采用尾插法建立单链表
-LinkList List_TailInsert(LinkList L, int length)
+//采用尾插法建立单链表，顺序的
+LinkList List_TailInsert(LinkList L, int length, int begin = 1, int step = 1, bool SET_ZERO = false)
 {
     LinkList p,lrear;
     lrear = L;
@@ -181,8 +181,9 @@ LinkList List_TailInsert(LinkList L, int length)
         p->data.str[1] = 'a';
         p->data.str[2] = 'r';
         p->data.str[3] = '\0';
-        p->data.value = i;
-        p->data.weight = 1;
+        p->data.value = begin+(i-1)*step;
+        if (SET_ZERO) p->data.weight = 0;
+        else p->data.weight = 1;
         p->next = NULL;
     }
     return L;
@@ -297,7 +298,7 @@ LinkList LinkList_FindMax(LinkList L)
     return q;
 }
 //选择排序单链表（带头结点）
-void Linklist_SelectSort(LinkList &L)
+void LinkList_SelectSort(LinkList &L)
 {
     //算法部分 选择插入排序
     LinkList p,q,r;
@@ -314,9 +315,52 @@ void Linklist_SelectSort(LinkList &L)
         q = LinkList_FindMax(p); 
         r = q->next;
         q ->next = r->next;
-
         r->next = L->next;
         L->next = r;
+    }
+}
+//单链表就地逆置（带头结点）
+void LinkList_reverse(LinkList &L)
+{
+    LinkList p,q,r;
+    p = L;
+    if (p->next == NULL || p->next->next == NULL)
+    {
+        printf("\nthe linklist has no need to revrese.\n");
+        return;
+    }
+    q = p->next;
+    r = q;
+    while (r->next != NULL)
+    {
+        q = r->next;
+        r->next = q->next;
+        q->next = p->next;
+        p->next = q;
+    }
+}
+//删除单链表中重复的结点（带头结点）
+void LinkList_mutex(LinkList &L)
+{
+    LinkList p,q;
+    //这里可能会发生溢出，所以最好要规范初始化
+    if (L->next == NULL)
+    {
+        printf("\nthe linklist does not exists!\n");
+        return;
+    }
+    p = L->next;
+    //因为要删除所以还是让p指向删除结点的前驱
+    while (p->next != NULL)
+    {
+        if (p->data.value == p->next->data.value)
+        {
+            q = p->next;
+            p->next = q->next;
+            free(q);
+        }
+        else
+        p = p->next;
     }
 }
 
@@ -949,8 +993,8 @@ void P40_08(){
     L2 = List_TailInsert_Random(L2,10,10,25);
     
     //算法部分，先进行排序，然后再使用双指针
-    Linklist_SelectSort(L1);
-    Linklist_SelectSort(L2);
+    LinkList_SelectSort(L1);
+    LinkList_SelectSort(L2);
     PrintLinkList(L1);
     PrintLinkList(L2);
     LinkList p,q;
@@ -968,12 +1012,16 @@ void P40_08(){
         if (p->data.value == q->data.value)
         {
             PrintLNode(p);
-            if (p->next->data.value == p->data.value && p->next != NULL)
+            if (p->next == NULL)
+                break;        
+            if (p->next->data.value == p->data.value)
             {
                 p = p->next;
                 continue;
             }
-            if (q->next->data.value == q->data.value && q->next != NULL)
+            if (q->next == NULL)
+                break;
+            if (q->next->data.value == q->data.value)
             {
                 q = q->next;
                 continue;
@@ -1014,38 +1062,309 @@ void P40_10(){
     res1 = InitLinklist();
     res2 = InitLinklist();
     L = List_TailInsert(L,10);
+    PrintLinkList(L);
 
     //算法部分
-    LinkList p,q,r;
-    int cnt = 1;
-    p = L->next;
-    while (p != NULL)
+    LinkList p,res1_rear,res2_rear;
+    res1_rear = res1;
+    res2_rear = res2;
+    if (L == NULL)
     {
+        printf("\nthe list is empty!\n");
+        return;
+    }
+    int cnt = 0;
+    while (L->next != NULL)
+    {
+        cnt++;
         if (cnt % 2 == 1)
         {
-            
+            p = L->next;
+            L->next = p->next;
+            p->next = NULL;
+            res1_rear->next = p;
+            res1_rear = res1_rear->next;
         }
-        
+        else
+        {
+            p = L->next;
+            L->next = p->next;
+            p->next = NULL;
+            res2_rear->next = p;
+            res2_rear = res2_rear->next;
+        }
     }
-    
+    PrintLinkList(res1);
+    PrintLinkList(res2);
 }
 void P40_11(){
-    
+    /*注，这题和上题的区别就在于是否是就地算法，
+    但是上题的空间复杂度只是申请了两个输出链表的头结点，
+    其他都是将原链表的结点断链连到新链表上，所以空间复杂度就是O(1)
+    已经是就地算法了，所以这题就是上题在表二部分采用头插即可*/
+    //初始化
+    LinkList L,res1,res2;
+    L = InitLinklist();
+    res1 = InitLinklist();
+    res2 = InitLinklist();
+    L = List_TailInsert(L,10);
+    PrintLinkList(L);
+
+    //算法部分
+    LinkList p,res1_rear;
+    res1_rear = res1;
+    if (L == NULL)
+    {
+        printf("\nthe list is empty!\n");
+        return;
+    }
+    int cnt = 0;
+    while (L->next != NULL)
+    {
+        cnt++;
+        if (cnt % 2 == 1)
+        {
+            p = L->next;
+            L->next = p->next;
+            p->next = NULL;
+            res1_rear->next = p;
+            res1_rear = res1_rear->next;
+        }
+        else
+        {
+            p = L->next;
+            L->next = p->next;
+            p->next = res2->next;
+            res2->next = p;
+        }
+    }
+    PrintLinkList(res1);
+    PrintLinkList(res2);
 }
 void P40_12(){
-    
+    //这题算法思想参考第八题，比第八题还要简单一些,简单在递增有序
+    //初始化
+    LinkList L;
+    L = InitLinklist();
+    L = List_TailInsert_Random(L,10,1,4);
+    //手动排一下序吧，太懒了没写自动递增的随机生成函数
+    LinkList_SelectSort(L);
+    PrintLinkList(L);
+
+    //算法部分
+    LinkList p,q;
+    if (L->next == NULL)
+    {
+        printf("\nthe linklist does not exists!\n");
+        return;
+    }
+    p = L->next;
+    //因为要删除所以还是让p指向删除结点的前驱
+    while (p->next != NULL)
+    {
+        if (p->data.value == p->next->data.value)
+        {
+            q = p->next;
+            p->next = q->next;
+            free(q);
+        }
+        else
+        p = p->next;
+    }
+    PrintLinkList(L);
 }
 void P40_13(){
-    
+    //初始化
+    LinkList L1,L2;
+    L1 = InitLinklist();
+    L2 = InitLinklist();
+    L1 = List_TailInsert(L1,5,1,2);
+    L2 = List_TailInsert(L2,5,1,3);
+    PrintLinkList(L1);
+    PrintLinkList(L2);
+    //算法部分，先归并成递增序列O(N)，再逆序O(N)，总时间复杂度O(N)
+    //将L2选择性插入到L1中
+    LinkList p,q;
+    p = L1;
+    while (L2->next != NULL)
+    {
+        //先进行判断是为了防止野指针导致内存错误
+        if (p->next == NULL)
+        {
+            q = L2->next;
+            p->next = q;
+            break;
+        }
+        
+        if (L2->next->data.value <= p->next->data.value)
+        {
+            q = L2->next;
+            L2->next = q->next;
+            q->next = p->next;
+            p->next = q;
+            p = p->next;
+        }
+        else
+            p = p->next;    
+    }
+    //逆置
+    LinkList_reverse(L1);
+    PrintLinkList(L1);
 }
 void P40_14(){
+    //题目说不许破坏等于就是找到之后自己申请空间存储，这种题目考察意义不大
+    //参考第八题，只是要求相同元素的话，那就在生成链表C后删去重复节点就可以
+    //时间复杂度其实都是O(N)，变化不大，串联写数量级上也是最小的
+    //初始化(照搬第八题)
+    LinkList L1,L2,res;
+    L1 = InitLinklist();
+    L2 = InitLinklist();
+    res = InitLinklist();
+    L1 = List_TailInsert_Random(L1,10,10,30);
+    L2 = List_TailInsert_Random(L2,10,10,25);
     
+    //算法部分，先进行排序，然后再使用双指针
+    LinkList_SelectSort(L1);
+    LinkList_SelectSort(L2);
+    PrintLinkList(L1);
+    PrintLinkList(L2);
+    LinkList p,q,r,resrear;
+    if (L1->next == NULL || L2->next == NULL)
+    {
+        printf("\nthe empty list is existed in input ,so no same node.\n");
+        return;
+    }
+    
+    p = L1->next;
+    q = L2->next;
+    resrear = res;
+    printf("\n");
+    while (p != NULL && q != NULL)
+    {
+        if (p->data.value == q->data.value)
+        {
+            r = (LinkList)malloc(sizeof(LNode));
+            r->next = NULL;
+            resrear->next = r;
+            resrear = r;
+            r->data.str[0] = 'v';
+            r->data.str[1] = 'a';
+            r->data.str[2] = 'r';
+            r->data.str[3] = '\0';
+            r->data.value = p->data.value;
+            if (p->next == NULL)
+                break;
+            if (p->next->data.value == p->data.value)
+            {
+                p = p->next;
+                continue;
+            }
+            if (q->next == NULL)
+                break;
+            if (q->next->data.value == q->data.value)
+            {
+                q = q->next;
+                continue;
+            }
+            p = p->next;
+            q = q->next;      
+        }
+        else if (p->data.value < q->data.value)
+            p = p->next;
+        else q = q->next;
+    }
+    LinkList_mutex(res);
+    PrintLinkList(res);
 }
 void P40_15(){
-    
+    //我想这题算法的本意是让我们从A中删掉不是交集的元素，
+    //所以相较于之前的略微调整
+    //初始化
+    LinkList L1,L2;
+    L1 = InitLinklist();
+    L2 = InitLinklist();
+    L1 = List_TailInsert(L1,5,1,2);
+    L2 = List_TailInsert(L2,5,1,4);
+    PrintLinkList(L1);
+    PrintLinkList(L2);
+    //算法部分
+    LinkList p,q,r;
+    p = L1;
+    q = L2;
+    //这个算法比上面所有的找交集的算法形式上都要简便,推荐用这个
+    while (p->next != NULL && q->next != NULL)
+    {
+        if (p->next->data.value == q->next->data.value)
+        {
+            p = p->next;
+            q = q->next;
+        }
+        else if (p->next->data.value < q->next->data.value)
+        {
+            r = p->next;
+            p->next = r->next;
+        }
+        else if (p->next->data.value > q->next->data.value)
+            q = q->next;
+    }
+    LinkList_mutex(L1);
+    PrintLinkList(L1);
 }
 void P40_16(){
-    
+    //判断子序列就是两步，定位，和看后续部分是否重合,复杂度O(N^2)
+    //这个算法是有问题的，在做完串之后在进行修正，最好就是用KMP
+    //初始化
+    LinkList major,sub;
+    major = InitLinklist();
+    sub = InitLinklist();
+    major = List_TailInsert_Random(major,10,1,3);
+    sub = List_TailInsert(sub,3);
+    PrintLinkList(major);
+    PrintLinkList(sub);
+    //算法部分
+    if (sub->next == NULL || major->next == NULL)
+    {
+        printf("\nthe string is empty and can not be matched. \n");
+        return;
+    }
+    LinkList p,q;
+    bool SUCCESS = true;
+    p = major->next;
+    q = sub->next;
+    //定位
+    while (p != NULL)
+    {
+        if (p->data.value == q->data.value)
+            break;
+        else
+            p = p->next;
+    }
+    if (p == NULL)
+    {
+        printf("\nmatch error\n");
+        return;
+    }
+    while (q->next != NULL)
+    {
+        if (p->next == NULL)
+        {
+            SUCCESS = false;
+            break;
+        }    
+        if (p->next->data.value == q->next->data.value)
+        {
+            p = p->next;
+            q = q->next;
+        }
+        else
+        {
+            SUCCESS = false;
+            break;
+        }
+            
+    }
+    if (SUCCESS) printf("\nmatched successfully.\n");
+    else printf("\nmatched error\n");
 }
 void P40_17(){
     
