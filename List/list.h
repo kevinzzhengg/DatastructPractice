@@ -122,7 +122,7 @@ int LocateElem(Sqlist L,Exchar e){
 };
 //----------------------------------------------------------------------------------
 //初始化带头节点的单链表。头节点不存储信息
-LinkList InitLinklist(){
+LinkList Init_HeadNode(){
     LinkList lhead;
     lhead = (LinkList)malloc(sizeof(LNode));
     Initexchar(lhead->data, 'L', 'H');
@@ -181,7 +181,7 @@ LinkList List_HeadInsert(LinkList &L){
 };
 
 //采用尾插法建立单链表
-LinkList List_TailInsert(LinkList &L){
+LinkList Init_LinkList(LinkList &L){
     LinkList p,lrear;
     int num;
     lrear = L;
