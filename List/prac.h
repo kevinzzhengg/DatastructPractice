@@ -125,6 +125,30 @@ int Sqlist_bisearch(Sqlist L, int value, int begin, int end)
         return end;
     else return end + 1;
 }
+//顺序表的选择排序
+void Sqlist_SelectSort(Sqlist &L)
+{
+    if (L.length == 0 || L.length == 1)
+    {
+        printf("\nthere is no need to sort.\n");
+        return;
+    }
+    int min = 1000,tmp;
+    for (int i = 1; i < L.length; i++)
+    {   
+        min = 1000;
+        for (int j = i; j <= L.length; j++)
+        {
+            if (L.data[j].value <= min)
+            {
+                min = L.data[j].value;
+                tmp = L.data[i].value;
+                L.data[i].value = L.data[j].value;
+                L.data[j].value = tmp;
+            } 
+        }
+    }
+}
 
 //链表区
 //打印单个结点
@@ -880,10 +904,17 @@ void P18_13(){
     Sqlist Cnt;
     int length = 5;
     Init_Sqlist_Random(L,length);
-    Init_Sqlist(Cnt,length,1,1,true);
     PrintSqlist(L);
-    PrintSqlist(Cnt);
-    
+    Sqlist_SelectSort(L);
+    PrintSqlist(L);
+    int cursor = 1;
+    while (cursor <= L.length)
+    {
+        if (L.data[cursor].value <= 1) cursor++;
+        else if (L.data[cursor].value == L.data[cursor-1].value + 1) cursor++;
+        else break;
+    }
+    printf("\nthe max positive number is %d(%d)\n",L.data[cursor].value-1,cursor);
 }
 void P18_14(){
     //初始化测试样例
