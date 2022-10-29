@@ -24,10 +24,11 @@ typedef struct Sqlist
     int length = 0; //初始表为空
 }Sqlist;
 
-//单链表定义
+//链表定义
 typedef struct LNode
 {
     Element data;
+    struct LNode *pre;
     struct LNode *next;
 }LNode,*LinkList;
 
@@ -155,20 +156,22 @@ bool PrintLinkList(LinkList L)
     return true;
 }
 //初始化链表头结点
-LinkList InitLinklist()
+LinkList Init_HeadNode()
 {
     LinkList lhead;
     lhead = (LinkList)malloc(sizeof(LNode));
-    lhead->data.str[0] = 'h';
-    lhead->data.str[1] = 'e';
-    lhead->data.str[2] = 'a';
-    lhead->data.str[3] = 'd';
-    lhead->data.value = 0;
+    lhead->data.str[0] = '*';
+    lhead->data.str[1] = 'L';
+    lhead->data.str[2] = '*';
+    lhead->data.str[3] = '\0';
+    lhead->data.value = -1;
+    lhead->data.weight = -1;
     lhead->next = NULL;
+    lhead->pre = NULL;
     return lhead;
 };
 //采用尾插法建立单链表，顺序的
-LinkList List_TailInsert(LinkList L, int length, int begin = 1, int step = 1, bool SET_ZERO = false)
+LinkList Init_LinkList(LinkList L, int length, int begin = 1, int step = 1, bool SET_ZERO = false)
 {
     LinkList p,lrear;
     lrear = L;
@@ -189,7 +192,7 @@ LinkList List_TailInsert(LinkList L, int length, int begin = 1, int step = 1, bo
     return L;
 };
 //生成随机数链表
-LinkList List_TailInsert_Random(LinkList L, int length, int start = 1,int end = 10)
+LinkList Init_LinkList_Random(LinkList L, int length, int start = 1,int end = 10)
 {
     LinkList p,lrear;
     srand((unsigned int)time(NULL));
@@ -362,6 +365,119 @@ void LinkList_mutex(LinkList &L)
         else
         p = p->next;
     }
+}
+
+//双链表区
+//初始化顺序双链表
+LinkList Init_DLinkList(LinkList &L,int length,int start = 1,int step = 1,bool SET_ZERO = false)
+{
+    LinkList p,lrear;
+    lrear = L;
+    for (int i = 1; i <= length; i++)
+    {
+        p = (LinkList)malloc(sizeof(LNode)); 
+        p->data.str[0] = 'v';
+        p->data.str[1] = 'a';
+        p->data.str[2] = 'r';
+        p->data.str[3] = '\0';
+        p->data.value = start+(i-1)*step;
+        if (SET_ZERO) p->data.weight = 0;
+        else p->data.weight = 1;
+        p->next = NULL;
+        p->pre = lrear;
+        lrear->next = p;
+        lrear = p;
+    }
+    return L;
+}
+//初始化随机双链表
+LinkList Init_DLinkList_Random(LinkList &L,int length,int start,int end)
+{
+    LinkList p,lrear;
+    srand((unsigned int)time(NULL));
+    lrear = L;
+    for (int i = 1; i <= length; i++)
+    {
+        p = (LinkList)malloc(sizeof(LNode));
+        p->data.str[0] = 'v';
+        p->data.str[1] = 'a';
+        p->data.str[2] = 'r';
+        p->data.str[3] = '\0';
+        p->data.value = rand() % (end - start + 1) + start;
+        p->data.weight = 1;
+        p->next = NULL;
+        p->pre = lrear;
+        lrear->next = p;
+        lrear = p;
+    }
+    return L;
+}
+
+//循环链表区（带有头结点，只需要有指针就行，想用循环单链就只使用后继）
+//初始化顺序循环双链表
+LinkList Init_CLinkList(LinkList &L,int length,int start = 1,int step = 1,bool SET_ZERO = false)
+{
+    LinkList p,lrear;
+    lrear = L;
+    for (int i = 1; i <= length; i++)
+    {
+        p = (LinkList)malloc(sizeof(LNode));
+        p->data.str[0] = 'v';
+        p->data.str[1] = 'a';
+        p->data.str[2] = 'r';
+        p->data.str[3] = '\0';
+        p->data.value = start+(i-1)*step;
+        if (SET_ZERO) p->data.weight = 0;
+        else p->data.weight = 1;
+        p->next = NULL;
+        p->pre = lrear;
+        lrear->next = p;
+        lrear = p;
+    }
+    lrear->next = L;
+    L->pre = lrear;
+    return L;
+}
+//初始化随机双链表
+LinkList Init_CLinkList_Random(LinkList &L,int length,int start,int end)
+{
+    LinkList p,lrear;
+    srand((unsigned int)time(NULL));
+    lrear = L;
+    for (int i = 1; i <= length; i++)
+    {
+        p = (LinkList)malloc(sizeof(LNode));
+        p->data.str[0] = 'v';
+        p->data.str[1] = 'a';
+        p->data.str[2] = 'r';
+        p->data.str[3] = '\0';
+        p->data.value = rand() % (end - start + 1) + start;
+        p->data.weight = 1;
+        p->next = NULL;
+        p->pre = lrear;
+        lrear->next = p;
+        lrear = p;
+    }
+    lrear->next = L;
+    L->pre = lrear;
+    return L;
+}
+//打印随机链表（判断打印结束的标志不一样，所以要重新写）
+void Print_CLinkList(LinkList L)
+{
+    if (L == NULL)
+    {
+        printf("\nthe head node is not existed!\n");
+        return;
+    }
+    printf("\nthe linklist is :\n");
+    LinkList p = L;
+    do{
+        PrintLNode(p);
+        p = p->next;
+    } while (p != L);   
+    printf("-\n");
+    return;
 }
 
 //静态链表区
@@ -809,8 +925,8 @@ void P18_14(){
 void P40_01(){
     //初始化
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert_Random(L,10,1,3);
+    L = Init_HeadNode();
+    L = Init_LinkList_Random(L,10,1,3);
     L = NoHeadLinklist(L);
     PrintLinkList(L);
     int del_target = 3;
@@ -820,8 +936,8 @@ void P40_01(){
 void P40_02(){
     //初始化
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert_Random(L,10,1,3);
+    L = Init_HeadNode();
+    L = Init_LinkList_Random(L,10,1,3);
     PrintLinkList(L);
     int x = 3;
 
@@ -844,13 +960,13 @@ void P40_02(){
 void P40_03(){
     //初始化部分
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert(L,5);
+    L = Init_HeadNode();
+    L = Init_LinkList(L,5);
     PrintLinkList(L);
 
     //算法部分 
     LinkList stack;
-    stack = InitLinklist();
+    stack = Init_HeadNode();
     LinkList p,q,r;
     p = L;
     q = stack; 
@@ -872,8 +988,8 @@ void P40_03(){
 void P40_04(){
     //初始化
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert_Random(L,5,20,50);
+    L = Init_HeadNode();
+    L = Init_LinkList_Random(L,5,20,50);
     PrintLinkList(L);
 
     //算法部分
@@ -909,8 +1025,8 @@ void P40_04(){
 void P40_05(){
     //初始化
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert(L,5);
+    L = Init_HeadNode();
+    L = Init_LinkList(L,5);
     PrintLinkList(L);
     //算法部分
     LinkList p,q,r;
@@ -934,8 +1050,8 @@ void P40_05(){
 void P40_06(){
     //初始化
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert_Random(L,5,10,80);
+    L = Init_HeadNode();
+    L = Init_LinkList_Random(L,5,10,80);
     PrintLinkList(L);
 
     //算法部分 选择插入排序
@@ -962,8 +1078,8 @@ void P40_06(){
 void P40_07(){
     //初始化
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert_Random(L,10,1,4);
+    L = Init_HeadNode();
+    L = Init_LinkList_Random(L,10,1,4);
     PrintLinkList(L);
     int start = 2;
     int end = 3;
@@ -987,10 +1103,10 @@ void P40_07(){
 void P40_08(){
     //初始化
     LinkList L1,L2;
-    L1 = InitLinklist();
-    L2 = InitLinklist();
-    L1 = List_TailInsert_Random(L1,10,10,30);
-    L2 = List_TailInsert_Random(L2,10,10,25);
+    L1 = Init_HeadNode();
+    L2 = Init_HeadNode();
+    L1 = Init_LinkList_Random(L1,10,10,30);
+    L2 = Init_LinkList_Random(L2,10,10,25);
     
     //算法部分，先进行排序，然后再使用双指针
     LinkList_SelectSort(L1);
@@ -1037,8 +1153,8 @@ void P40_08(){
 void P40_09(){
     //初始化
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert_Random(L,5,10,80);
+    L = Init_HeadNode();
+    L = Init_LinkList_Random(L,5,10,80);
     PrintLinkList(L);
     //算法部分，每找到一个最小值就输出并且删除
     LinkList p,q;
@@ -1058,10 +1174,10 @@ void P40_09(){
 void P40_10(){
     //初始化
     LinkList L,res1,res2;
-    L = InitLinklist();
-    res1 = InitLinklist();
-    res2 = InitLinklist();
-    L = List_TailInsert(L,10);
+    L = Init_HeadNode();
+    res1 = Init_HeadNode();
+    res2 = Init_HeadNode();
+    L = Init_LinkList(L,10);
     PrintLinkList(L);
 
     //算法部分
@@ -1104,10 +1220,10 @@ void P40_11(){
     已经是就地算法了，所以这题就是上题在表二部分采用头插即可*/
     //初始化
     LinkList L,res1,res2;
-    L = InitLinklist();
-    res1 = InitLinklist();
-    res2 = InitLinklist();
-    L = List_TailInsert(L,10);
+    L = Init_HeadNode();
+    res1 = Init_HeadNode();
+    res2 = Init_HeadNode();
+    L = Init_LinkList(L,10);
     PrintLinkList(L);
 
     //算法部分
@@ -1145,8 +1261,8 @@ void P40_12(){
     //这题算法思想参考第八题，比第八题还要简单一些,简单在递增有序
     //初始化
     LinkList L;
-    L = InitLinklist();
-    L = List_TailInsert_Random(L,10,1,4);
+    L = Init_HeadNode();
+    L = Init_LinkList_Random(L,10,1,4);
     //手动排一下序吧，太懒了没写自动递增的随机生成函数
     LinkList_SelectSort(L);
     PrintLinkList(L);
@@ -1176,10 +1292,10 @@ void P40_12(){
 void P40_13(){
     //初始化
     LinkList L1,L2;
-    L1 = InitLinklist();
-    L2 = InitLinklist();
-    L1 = List_TailInsert(L1,5,1,2);
-    L2 = List_TailInsert(L2,5,1,3);
+    L1 = Init_HeadNode();
+    L2 = Init_HeadNode();
+    L1 = Init_LinkList(L1,5,1,2);
+    L2 = Init_LinkList(L2,5,1,3);
     PrintLinkList(L1);
     PrintLinkList(L2);
     //算法部分，先归并成递增序列O(N)，再逆序O(N)，总时间复杂度O(N)
@@ -1217,11 +1333,11 @@ void P40_14(){
     //时间复杂度其实都是O(N)，变化不大，串联写数量级上也是最小的
     //初始化(照搬第八题)
     LinkList L1,L2,res;
-    L1 = InitLinklist();
-    L2 = InitLinklist();
-    res = InitLinklist();
-    L1 = List_TailInsert_Random(L1,10,10,30);
-    L2 = List_TailInsert_Random(L2,10,10,25);
+    L1 = Init_HeadNode();
+    L2 = Init_HeadNode();
+    res = Init_HeadNode();
+    L1 = Init_LinkList_Random(L1,10,10,30);
+    L2 = Init_LinkList_Random(L2,10,10,25);
     
     //算法部分，先进行排序，然后再使用双指针
     LinkList_SelectSort(L1);
@@ -1281,10 +1397,10 @@ void P40_15(){
     //所以相较于之前的略微调整
     //初始化
     LinkList L1,L2;
-    L1 = InitLinklist();
-    L2 = InitLinklist();
-    L1 = List_TailInsert(L1,5,1,2);
-    L2 = List_TailInsert(L2,5,1,4);
+    L1 = Init_HeadNode();
+    L2 = Init_HeadNode();
+    L1 = Init_LinkList(L1,5,1,2);
+    L2 = Init_LinkList(L2,5,1,4);
     PrintLinkList(L1);
     PrintLinkList(L2);
     //算法部分
@@ -1315,10 +1431,10 @@ void P40_16(){
     //这个算法是有问题的，在做完串之后在进行修正，最好就是用KMP
     //初始化
     LinkList major,sub;
-    major = InitLinklist();
-    sub = InitLinklist();
-    major = List_TailInsert_Random(major,10,1,3);
-    sub = List_TailInsert(sub,3);
+    major = Init_HeadNode();
+    sub = Init_HeadNode();
+    major = Init_LinkList_Random(major,10,1,3);
+    sub = Init_LinkList(sub,3);
     PrintLinkList(major);
     PrintLinkList(sub);
     //算法部分
@@ -1367,18 +1483,81 @@ void P40_16(){
     else printf("\nmatched error\n");
 }
 void P40_17(){
-    
+    //初始化
+    LinkList L;
+    L = Init_HeadNode();
+    L = Init_CLinkList_Random(L,3,1,2);
+    Print_CLinkList(L);
+    LinkList p,q;
+    bool SYMMETRY = true;
+    p = L;
+    q = L;
+    do
+    {
+        if (p->data.value == q->data.value)
+        {
+            p = p->next;
+            q = q->pre;
+        }
+        else
+        {
+            SYMMETRY = false;
+            break;
+        }
+    }while (p != q && p != q->next);
+    if (SYMMETRY)
+        printf("\nthe linklist is symmetrical.\n");
+    else printf("\nthe linklist is not symmetrical.\n");
 }
 void P40_18(){
+    //初始化
+    LinkList h1,h2;
+    h1 = Init_HeadNode();
+    h2 = Init_HeadNode();
+    h1 = Init_CLinkList(h1,5,1);
+    h2 = Init_CLinkList(h2,5,6);
+    Print_CLinkList(h1);
+    Print_CLinkList(h2);
+    LinkList p,q;
+    p = h2;
+    q = h2->pre;
+    if (p == q)
+    {
+        printf("\nthere is no need to insert.\n");
+        return;
+    }
+    p = p->next;
+    p->pre = h1->pre;
+    q->next = h1;
+    h1->pre->next = p;
+    h1->pre = q;
+    free(h2);
+    Print_CLinkList(h1);
+}
+void P41_19(){
+
+}
+void P41_20(){
     
 }
-
+void P41_21(){
+    
+}
+void P41_22(){
+    
+}
+void P41_23(){
+    
+}
+void P41_24(){
+    
+}
 void P42_25(){
     //初始化头结点
-    LinkList L = InitLinklist();
+    LinkList L = Init_HeadNode();
     //创建测试单链表
     int num = 8;
-    L = List_TailInsert(L,num);
+    L = Init_LinkList(L,num);
     //打印初始化的单链表信息
     PrintLinkList(L);
     //实现算法部分,首先实现链表逆置
