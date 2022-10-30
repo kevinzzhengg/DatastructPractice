@@ -544,6 +544,35 @@ int max_in_tri(int a, int b,int c)
 {
     return a >= b ? (c >= a ? c : a) : ( c >= b ? c : b);
 }
+//P41_20
+LinkList Locate(LinkList &L,int x)
+{
+    LinkList p,q;
+    p = L;
+    while (p->next != L)
+    {
+        if (p->next->data.value == x)
+        {
+            p->next->data.weight++;
+            if (p == L) break;
+            if (p->data.weight > p->next->data.weight) break;
+            q = p->next;
+            while (q->pre != L && q->pre->data.weight <= q->data.weight)
+            {
+                p = q->pre;
+                p->next = q->next;
+                q->next = p;
+                p->pre->next = q;
+                p->next->pre = p;
+                p->pre->next->pre = p->pre;
+                p->pre = q;
+            }
+            break;
+        }
+        p = p->next;
+    }
+    return L;
+}
 //--------------------------------------
 //练习函数区
 //顺序表习题
@@ -1566,22 +1595,225 @@ void P40_18(){
     Print_CLinkList(h1);
 }
 void P41_19(){
-
+    //初始化
+    LinkList L;
+    L = Init_HeadNode();
+    L = Init_CLinkList_Random(L,7,1,40);
+    Print_CLinkList(L);
+    //算法部分
+    LinkList p,q,r;
+    int min = 1000;
+    if (L == NULL)
+    {
+        printf("\nthe linklist is empty!\n");
+        return;
+    }
+    
+    p = L;
+    while (L->next != L)
+    {      
+        if (p->next == L)
+        {
+            r = q->next;
+            PrintLNode(r);
+            q->next = q->next->next;
+            p = p->next;
+            free(r);
+            min = 1000;
+            continue;
+        }  
+        if (p->next->data.value <= min)
+        {
+            min = p->next->data.value;
+            q = p;
+        }
+        p = p->next;
+    }
+    Print_CLinkList(L);
 }
 void P41_20(){
-    
+    //初始化
+    LinkList L;
+    L = Init_HeadNode();
+    L = Init_CLinkList(L,5,1,1,true);
+    Print_CLinkList(L);
+    L = Locate(L,5);
+    L = Locate(L,4);
+    Print_CLinkList(L);
 }
 void P41_21(){
-    
+    LinkList L1,L2;
+    L1 = Init_HeadNode();
+    L2 = Init_HeadNode();
+    //L1 = Init_LinkList(L1,5);
+    L2 = Init_CLinkList(L2,5);
+    LinkList p,q;
+    bool CIRCUL_KEY = false;
+    //p = L1;
+    //q = L1;
+    p = L2;
+    q = L2;
+    while (true)
+    {
+        if (p->next != NULL) p = p->next;
+        else 
+        {   
+            CIRCUL_KEY = false;
+            break;
+        }
+        if (q->next != NULL) q = q->next;
+        else 
+        {   
+            CIRCUL_KEY = false;
+            break;
+        }
+        if (q->next != NULL) q = q->next;
+        else 
+        {   
+            CIRCUL_KEY = false;
+            break;
+        }
+        if (p == q)
+        {
+            CIRCUL_KEY = true;
+            break;
+        }
+    }   
+    if (CIRCUL_KEY)
+        printf("\nthe linklist has circuit,\n");
+    else
+        printf("\nthe linklist has no circuit,\n");
 }
 void P41_22(){
+    //初始化
+    LinkList L;
+    L = Init_HeadNode();
+    L = Init_LinkList(L,7);
+    PrintLinkList(L);
+    //算法部分
+    int cnt = 0;
+    int k = 3;
+    LinkList p;
+    p = L;
+    while (p->next != NULL)
+    {
+        cnt++;
+        p = p->next;
+    }
+    p = L;
+    for (int i = 1; i <= cnt - k + 1; i++)
+        p = p->next;
+    PrintLNode(p);
     
 }
 void P41_23(){
+    //初始化
+    char str1[] = "loading";
+    char str2[] = "being";
+    LinkList L1,L2;
+    L1 = Init_HeadNode();
+    L2 = Init_HeadNode();
+    int length1 = sizeof(str1)/sizeof(char) - 1;
+    int length2 = sizeof(str2)/sizeof(char) - 1;
+    L1 = Init_LinkList_Random(L1,length1,1,1);
+    L2 = Init_LinkList_Random(L2,length2,1,1);
+    LinkList p,q,r;
+    p = L1;
+    for (int i = 0; i < length1; i++)
+    {
+        p = p->next;
+        p->data.str[0] = '-';
+        p->data.str[1] = str1[i];
+        p->data.str[2] = '-';
+        p->data.str[3] = '\0';
+        if (str1[i] == 'i')
+            r = p;        
+    }
+    p = L2;
+    for (int i = 0; i < length2; i++)
+    {
+        p = p->next;
+        p->data.str[0] = '-';
+        p->data.str[1] = str2[i];
+        p->data.str[2] = '-';
+        p->data.str[3] = '\0';
+        if (str2[i] == 'e')
+        {
+            p->next = r;
+            break;
+        }
+    }
+    PrintLinkList(L1);
+    PrintLinkList(L2);
+    //算法部分
+    int cnt1 = 0,cnt2 = 0;
+    p = L1;
+    while (p->next != NULL)
+    {
+        cnt1++;
+        p = p->next;
+    }
+    p = L2;
+    while (p->next != NULL)
+    {
+        cnt2++;
+        p = p->next;
+    }
+    p = L1;
+    q = L2;
+    while (p->next != NULL && q->next != NULL)
+    {
+        if (cnt1 > cnt2)
+        {
+            p = p->next;
+            cnt1--;
+        }
+        else if (cnt1 < cnt2)
+        {
+            q = q->next;
+            cnt2--;
+        }
+        else if (p == q)
+        {   
+            PrintLNode(p);  //这里写在函数里就是返回值，返回指针
+            break;
+        }
+        else
+        {
+            p = p->next;
+            q = q->next;
+            cnt1--;
+            cnt2--;
+        }
+    }
     
 }
 void P41_24(){
-    
+    //初始化
+    LinkList L;
+    L = Init_HeadNode();
+    L = Init_LinkList_Random(L,7,-3,3);
+    PrintLinkList(L);
+
+    //算法部分
+    int arr[4] = {0};
+    LinkList p,q;
+    p = L;
+    while (p->next != NULL)
+    {
+        if (arr[abs(p->next->data.value)] == 0)
+        {
+            arr[abs(p->next->data.value)] = 1;
+            p = p->next;
+        }
+        else
+        {
+            q = p->next;
+            p->next = q->next;
+            free(q);
+        }
+    }
+    PrintLinkList(L);
 }
 void P42_25(){
     //初始化头结点
